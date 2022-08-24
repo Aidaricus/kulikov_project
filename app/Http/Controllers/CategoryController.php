@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
@@ -16,9 +18,11 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
+
         if (Auth::user() == null) {
             return abort(403);
         }
+
         return view('categories.index', compact('categories'));
     }
 
@@ -43,16 +47,15 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         // Validation
-        // dd($request->all());
         $request->validate([
             'name' => ['required',],
         ]);
+
         // Creating new product
         $category = Category::create([
             'name' => $request->name,
             'is_visible' => ($request->is_visible == 'on'),
         ]);
-
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
@@ -91,13 +94,13 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $category = Category::find($id);
+
         // Validating product
         $request->validate([
             'name' => ['required',],
         ]);
-        // dd($request->all());
+
         // Updating product
-        // $category->update($request->all());
         $category->update(
             [
                 'is_visible' => ($request->input('is_visible') == 'on'),
@@ -118,6 +121,18 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::find($id);
+
+        // Удалим все продукты данной категории
+        $products = $category->products()->get();
+        foreach ($products as $product) {
+            // Удалим все фотографии этого продукта 
+
+            Storage::delete($product->image->original_image);
+            Storage::delete($product->image->full_image);
+            Storage::delete($product->image->preview_image);
+            $product->image->delete();
+            $product->delete();
+        }
         $category->delete();
         return redirect()->route('categories.index')
             ->with('success', 'Category deleted successfully');

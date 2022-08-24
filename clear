@@ -1,0 +1,23 @@
+[33mcommit 0f69888eb6e237f00e5b70ec20c76c4bf949e4d4[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Aidaricus <amankulov.a@phystech.edu>
+Date:   Wed Aug 24 11:45:42 2022 +0600
+
+    Add project
+
+[33mcommit ef5b5e83371533bb26f9cf9b48ace171d620bc74[m
+Author: Aidaricus <108796735+Aidaricus@users.noreply.github.com>
+Date:   Wed Aug 24 11:42:07 2022 +0600
+
+    Delete .gitignore
+
+[33mcommit ddfbaec1c9187d995d82f4bfc77261cc84d9a8af[m
+Author: Aidaricus <108796735+Aidaricus@users.noreply.github.com>
+Date:   Wed Aug 24 11:31:09 2022 +0600
+
+    Create .gitignore
+
+[33mcommit 5ec5be93466453ccd12feeb0ec11a2ed3c8d433e[m
+Author: Aidaricus <amankulov.a@phystech.edu>
+Date:   Wed Aug 24 11:16:20 2022 +0600
+
+    first commit

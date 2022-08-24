@@ -28,6 +28,14 @@
 	</div>
 
 	<div class="col-xs-12 col-sm-12 col-md-12">
+
+		<strong>Image:</strong>
+		<img src="/storage/{{ $product->image->full_image }}" class="img-fluid" alt="...">
+		<!-- <img src="storage/{{ $product->image->preview_image }}" class="img-thumbnail" alt="{{ $product->name }}_image"> -->
+
+	</div>
+
+	<div class="col-xs-12 col-sm-12 col-md-12">
 		<div class="form-group">
 			<strong>Description:</strong>
 			{{ $product->description }}

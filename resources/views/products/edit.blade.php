@@ -22,7 +22,7 @@
 </div>
 @endif
 
-<form action="{{ route('products.update', $product->id) }}" method="POST">
+<form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
 
 	@csrf
 
@@ -56,6 +56,13 @@
 			<div class="form-group">
 				<strong>Price:</strong>
 				<input type="integer" name="price" value="{{ $product->price }}" class="form-control" placeholder="$">
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-sm-12 col-md-12">
+			<strong>Choose new image:</strong>
+			<div class="input-group mb-3">
+				<input type="file" class="form-control" id="image" name="image" id="inputGroupFile02">
 			</div>
 		</div>
 

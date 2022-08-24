@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Image as ModelsImage;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+
+use function GuzzleHttp\Promise\queue;
 
 class ProductController extends Controller
 {
@@ -51,7 +54,7 @@ class ProductController extends Controller
             'description' => ['required',],
             'price' => ['required', 'numeric'],
             'category_id' => ['required'],
-            'image' => ['sometimes', 'file:jpg,jpeg,png',],
+            'image' => ['required', 'file:jpg,jpeg,png',],
         ]);
 
 
@@ -61,13 +64,32 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'category_id' => $request->category_id,
-            // 'photo_src' => $request->image
         ]);
 
         if ($request->hasFile('image')) {
+            // Достанем с блейда новый ImageUpload
             $image =  $request->file('image');
-            $path = $image->store('products');
-            $product->update(['photo_src' => $path]);
+            $path = $image->store('products/original');
+
+            // Создадим запись в images
+            $preview_image = Image::make($image)->fit(100, 100);
+            $full_image = Image::make($image)->fit(800, 500);
+
+            $preview_name =  $image->hashName();
+            $full_name =  $image->hashName();
+
+            $image_note = ModelsImage::create(
+                [
+                    'original_image' => $path,
+                    'preview_image' => 'products/previews/' . $preview_name,
+                    'full_image' => 'products/full/' . $full_name,
+                    'product_id' => $product->id,
+                ]
+            );
+
+            // Сохраним файлы
+            $preview_image->save(storage_path('app/public/products/previews/' . $preview_name));
+            $full_image->save(storage_path('app/public/products/full/' . $full_name));
         }
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
@@ -109,16 +131,58 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::find($id);
+
         // Validating product
         $request->validate([
             'name' => ['required',],
             'description' => ['required',],
             'price' => ['required', 'numeric'],
             'category_id' => ['required'],
+            'image' => ['required', 'file:jpg,jpeg,png',],
         ]);
-        // Updating product
 
-        $product->update($request->all());
+        // Updating product
+        $product->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'category_id' => $request->category_id,
+        ]);
+
+        // Updating new image
+        if ($request->hasFile('image')) {
+
+            // Удалим старые изображения
+            Storage::delete($product->image->original_image);
+            Storage::delete($product->image->full_image);
+            Storage::delete($product->image->preview_image);
+
+            // Достанем с блейда новый ImageUpload
+            $image =  $request->file('image');
+            $path = $image->store('products/original');
+
+            // Создадим запись в images
+            $preview_image = Image::make($image)->fit(100, 100);
+            $full_image = Image::make($image)->fit(800, 500);
+
+            $preview_name = 'prev_' . $image->hashName();
+            $full_name = 'full_' . $image->hashName();
+
+            $image_note = $product->image->update(
+                [
+                    'original_image' => $path,
+                    'preview_image' => 'products/previews/' . $preview_name,
+                    'full_image' => 'products/full/' . $full_name,
+                    'product_id' => $product->id,
+                ]
+            );
+
+
+            // Сохраним новые 
+            $preview_image->save(storage_path('app/public/products/previews/' . $preview_name));
+            $full_image->save(storage_path('app/public/products/full/' . $full_name));
+        }
+
         // View
         return redirect()->route('products.index')->with('success', 'Product updated successfully');
     }
@@ -131,11 +195,11 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = Product::find($id);
+        Storage::delete($product->image->original_image);
+        Storage::delete($product->image->full_image);
+        Storage::delete($product->image->preview_image);
+        $product->image()->delete();
         $product->delete();
-        if ($product->photo_src) {
-            Storage::delete($product->photo_src);
-        }
-
         return redirect()->route('products.index')
             ->with('success', 'Product deleted successfully');
     }

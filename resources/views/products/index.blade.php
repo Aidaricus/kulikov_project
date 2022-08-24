@@ -39,7 +39,7 @@
 			<td>{{ $product->category_id }}</td>
 			<td>{{ $product->description }}</td>
 			<td>{{ $product->price }}</td>
-			<td><img src="storage/{{ $product->photo_src }}" class="img-thumbnail" alt="{{ $product->name }}_image"></td>
+			<td><img src="/storage/{{ $product->image->preview_image }}" class="img-thumbnail" alt="{{ $product->name }}_image"></td>
 			<th><a class="btn btn-info" href="{{ route('products.show', $product->id) }}">Show</a></th>
 
 			<th><a class="btn btn-warning" href="{{ route('products.edit', $product->id) }}">Edit</a></th>
